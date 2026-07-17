@@ -1,0 +1,196 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.gov/schemas/batchjobs/job-manifest.v1.json",
+  "title": "Container job manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "id",
+    "displayName",
+    "owner",
+    "enabled",
+    "runtime",
+    "schedule",
+    "execution"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "schemaVersion": {
+      "const": "1.0"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{2,39}$"
+    },
+    "displayName": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "owner": {
+      "type": "string",
+      "format": "email"
+    },
+    "enabled": {
+      "type": "boolean"
+    },
+    "runtime": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["script", "dependencyGroup", "timeoutSeconds", "cpu", "memory"],
+      "properties": {
+        "script": {
+          "type": "string",
+          "pattern": "^(?![/\\\\])(?!.*(?:^|[/\\\\])\\.\\.(?:[/\\\\]|$)).+\\.py$"
+        },
+        "dependencyGroup": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{1,29}$"
+        },
+        "timeoutSeconds": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 86400
+        },
+        "cpu": {
+          "type": "number",
+          "enum": [0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3, 3.25, 3.5, 3.75, 4]
+        },
+        "memory": {
+          "type": "string",
+          "pattern": "^[1-9][0-9]*(Mi|Gi)$"
+        },
+        "arguments": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": []
+        }
+      }
+    },
+    "schedule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cronExpressionUtc"],
+      "properties": {
+        "cronExpressionUtc": {
+          "type": "string",
+          "minLength": 9,
+          "maxLength": 100,
+          "pattern": "^[0-9*/,\\-]+ [0-9*/,\\-]+ [0-9*/,\\-]+ [0-9*/,\\-]+ [0-9*/,\\-]+$",
+          "description": "Five-field cron expression evaluated in UTC by Azure Container Apps Jobs."
+        }
+      }
+    },
+    "execution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["retryLimit", "overlapPolicy"],
+      "properties": {
+        "retryLimit": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10
+        },
+        "overlapPolicy": {
+          "const": "skip"
+        }
+      }
+    },
+    "monitoring": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "maxSilenceMinutes": {
+          "type": "integer",
+          "minimum": 5,
+          "maximum": 2880,
+          "default": 1440
+        },
+        "alertOnStale": {
+          "type": "boolean",
+          "default": false
+        },
+        "alertOnFailure": {
+          "type": "boolean",
+          "default": true
+        },
+        "alertOnOverlap": {
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "default": {}
+    },
+    "environment": {
+      "type": "object",
+      "propertyNames": {
+        "pattern": "^[A-Z_][A-Z0-9_]*$"
+      },
+      "additionalProperties": {
+        "type": "string"
+      },
+      "default": {}
+    },
+    "secretReferences": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "keyVaultSecretUri"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]{1,39}$"
+          },
+          "keyVaultSecretUri": {
+            "type": "string",
+            "pattern": "^https://[a-zA-Z0-9-]+\\.vault\\.azure\\.net/secrets/[a-zA-Z0-9-]+$"
+          },
+          "environmentVariable": {
+            "type": "string",
+            "pattern": "^[A-Z_][A-Z0-9_]*$"
+          },
+          "mountPath": {
+            "type": "string",
+            "pattern": "^/"
+          }
+        },
+        "oneOf": [
+          { "required": ["environmentVariable"] },
+          { "required": ["mountPath"] }
+        ]
+      },
+      "default": []
+    },
+    "volumeMounts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["storageName", "mountPath", "accessMode"],
+        "properties": {
+          "storageName": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]{1,39}$"
+          },
+          "mountPath": {
+            "type": "string",
+            "pattern": "^/"
+          },
+          "subPath": {
+            "type": "string",
+            "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$)).*$"
+          },
+          "accessMode": {
+            "type": "string",
+            "enum": ["ReadOnly", "ReadWrite"]
+          }
+        }
+      },
+      "default": []
+    }
+  }
+}

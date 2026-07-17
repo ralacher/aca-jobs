@@ -1,0 +1,14 @@
+.git
+.github
+.azure
+.venv
+__pycache__
+*.pyc
+.env
+.env.*
+*.local
+*.local.*
+infra/main.json
+infra/main.parameters*.json
+tests
+docs

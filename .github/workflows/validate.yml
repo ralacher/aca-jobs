@@ -1,0 +1,41 @@
+name: Validate
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  repository:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install validation dependencies
+        run: python -m pip install -e '.[dev]'
+
+      - name: Validate contracts and runner
+        run: python -m unittest discover -s tests -v
+
+      - name: Check generated job parameters
+        run: batchjobs-compile --check
+
+      - name: Compile without importing job modules
+        run: python -m compileall -q src jobs
+
+      - name: Validate Bicep
+        run: az bicep build --file infra/main.bicep --stdout > /dev/null
+
+      - name: Build runtime image
+        run: docker build --tag container-jobs:${{ github.sha }} .

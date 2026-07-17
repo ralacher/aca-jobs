@@ -1,0 +1,16 @@
+.venv/
+.azure/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.coverage
+htmlcov/
+infra/main.json
+infra/main.parameters*.json
+!infra/main.parameters.example.json
+.env
+.env.*
+!.env.example
+*.local
+*.local.*

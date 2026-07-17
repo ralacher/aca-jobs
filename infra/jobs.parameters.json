@@ -1,0 +1,33 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "jobDefinitions": {
+      "value": [
+        {
+          "arguments": [],
+          "cpu": 0.5,
+          "cronExpressionUtc": "30 10 * * 1-5",
+          "enabled": true,
+          "environment": [
+            {
+              "name": "EXAMPLE_MODE",
+              "value": "validation-only"
+            }
+          ],
+          "id": "example-report",
+          "memory": "1Gi",
+          "monitoring": {
+            "alertOnFailure": true,
+            "alertOnOverlap": false,
+            "alertOnStale": false,
+            "maxSilenceMinutes": 1440
+          },
+          "retryLimit": 0,
+          "script": "/app/jobs/example-report/script.py",
+          "timeoutSeconds": 900
+        }
+      ]
+    }
+  }
+}

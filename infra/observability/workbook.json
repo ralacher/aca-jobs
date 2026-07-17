@@ -1,0 +1,172 @@
+{
+  "version": "Notebook/1.0",
+  "items": [
+    {
+      "type": 1,
+      "content": {
+        "json": "# Container Jobs Operations\nFleet health, execution history, duration, and diagnostics from `batchjobs.lifecycle.v1` records."
+      },
+      "name": "title"
+    },
+    {
+      "type": 9,
+      "content": {
+        "version": "KqlParameterItem/1.0",
+        "crossComponentResources": [
+          "__WORKSPACE_ID__"
+        ],
+        "parameters": [
+          {
+            "id": "time-range",
+            "version": "KqlParameterItem/1.0",
+            "name": "TimeRange",
+            "label": "Time range",
+            "type": 4,
+            "isRequired": true,
+            "value": {
+              "durationMs": 604800000
+            },
+            "typeSettings": {
+              "selectableValues": [
+                {
+                  "durationMs": 86400000
+                },
+                {
+                  "durationMs": 604800000
+                },
+                {
+                  "durationMs": 2592000000
+                }
+              ]
+            }
+          },
+          {
+            "id": "job-filter",
+            "version": "KqlParameterItem/1.0",
+            "name": "Job",
+            "label": "Job",
+            "type": 2,
+            "isRequired": true,
+            "query": "ContainerAppConsoleLogs_CL\n| extend lifecycle = parse_json(Log_s)\n| where tostring(lifecycle.schema) == 'batchjobs.lifecycle.v1'\n| project value = tostring(lifecycle.job_id), label = tostring(lifecycle.job_id)\n| distinct value, label\n| order by label asc",
+            "crossComponentResources": [
+              "__WORKSPACE_ID__"
+            ],
+            "queryType": 0,
+            "resourceType": "microsoft.operationalinsights/workspaces",
+            "value": "value::all",
+            "typeSettings": {
+              "additionalResourceOptions": [
+                "value::all"
+              ],
+              "showDefault": false
+            }
+          }
+        ],
+        "style": "pills",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces"
+      },
+      "name": "parameters"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "let Lifecycle = ContainerAppConsoleLogs_CL\n| extend lifecycle = parse_json(Log_s)\n| where tostring(lifecycle.schema) == 'batchjobs.lifecycle.v1'\n| extend job_id = tostring(lifecycle.job_id), event = tostring(lifecycle.event)\n| where '{Job}' == 'value::all' or job_id == '{Job}';\nunion\n(Lifecycle | summarize Count=countif(event == 'started') | extend Metric='Executions'),\n(Lifecycle | summarize Count=countif(event == 'completed') | extend Metric='Succeeded'),\n(Lifecycle | summarize Count=countif(event in ('failed','timed_out','lock_failed','rejected')) | extend Metric='Failed'),\n(Lifecycle | summarize Count=countif(event == 'skipped_overlap') | extend Metric='Overlap skips')\n| project Metric, Count",
+        "size": 4,
+        "title": "Fleet summary",
+        "timeContextFromParameter": "TimeRange",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "crossComponentResources": [
+          "__WORKSPACE_ID__"
+        ],
+        "visualization": "tiles",
+        "tileSettings": {
+          "showBorder": false,
+          "titleContent": {
+            "columnMatch": "Metric",
+            "formatter": 1
+          },
+          "leftContent": {
+            "columnMatch": "Count",
+            "formatter": 12
+          }
+        }
+      },
+      "name": "fleet-summary"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "ContainerAppConsoleLogs_CL\n| extend lifecycle = parse_json(Log_s)\n| where tostring(lifecycle.schema) == 'batchjobs.lifecycle.v1'\n| extend job_id = tostring(lifecycle.job_id), event = tostring(lifecycle.event), event_time = todatetime(lifecycle.timestamp), duration_ms = tolong(lifecycle.duration_ms), exit_code = toint(lifecycle.exit_code), execution_id = tostring(lifecycle.execution_id)\n| where event in ('completed','failed','timed_out','lock_failed','rejected','skipped_overlap')\n| where '{Job}' == 'value::all' or job_id == '{Job}'\n| summarize arg_max(event_time, event, execution_id, duration_ms, exit_code) by job_id\n| project Job=job_id, LastRun=event_time, Status=event, Execution=execution_id, DurationMs=duration_ms, ExitCode=exit_code\n| order by LastRun desc",
+        "size": 0,
+        "title": "Latest status by job",
+        "timeContextFromParameter": "TimeRange",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "crossComponentResources": [
+          "__WORKSPACE_ID__"
+        ],
+        "visualization": "table"
+      },
+      "name": "latest-status"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "ContainerAppConsoleLogs_CL\n| extend lifecycle = parse_json(Log_s)\n| where tostring(lifecycle.schema) == 'batchjobs.lifecycle.v1'\n| extend job_id = tostring(lifecycle.job_id), event = tostring(lifecycle.event), duration_ms = tolong(lifecycle.duration_ms)\n| where event in ('completed','failed','timed_out')\n| where '{Job}' == 'value::all' or job_id == '{Job}'\n| summarize AverageDurationSeconds=avg(duration_ms / 1000.0), P95DurationSeconds=percentile(duration_ms / 1000.0, 95) by bin(TimeGenerated, 1h), job_id\n| order by TimeGenerated asc",
+        "size": 0,
+        "title": "Execution duration",
+        "timeContextFromParameter": "TimeRange",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "crossComponentResources": [
+          "__WORKSPACE_ID__"
+        ],
+        "visualization": "timechart"
+      },
+      "name": "duration-trend"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "ContainerAppConsoleLogs_CL\n| extend lifecycle = parse_json(Log_s)\n| where tostring(lifecycle.schema) == 'batchjobs.lifecycle.v1'\n| extend job_id = tostring(lifecycle.job_id), event = tostring(lifecycle.event), execution_id = tostring(lifecycle.execution_id), error_type = tostring(lifecycle.error_type), exit_code = toint(lifecycle.exit_code)\n| where event in ('failed','timed_out','lock_failed','rejected')\n| where '{Job}' == 'value::all' or job_id == '{Job}'\n| project TimeGenerated, Job=job_id, Event=event, Execution=execution_id, ExitCode=exit_code, ErrorType=error_type, Log_s\n| order by TimeGenerated desc",
+        "size": 0,
+        "title": "Failures and platform errors",
+        "timeContextFromParameter": "TimeRange",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "crossComponentResources": [
+          "__WORKSPACE_ID__"
+        ],
+        "visualization": "table"
+      },
+      "name": "failures"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "ContainerAppConsoleLogs_CL\n| where '{Job}' == 'value::all' or ContainerName_s == '{Job}'\n| project TimeGenerated, Job=ContainerName_s, Execution=ContainerGroupName_s, Stream=Stream_s, Message=Log_s\n| order by TimeGenerated desc\n| take 500",
+        "size": 0,
+        "title": "Recent console output",
+        "timeContextFromParameter": "TimeRange",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "crossComponentResources": [
+          "__WORKSPACE_ID__"
+        ],
+        "visualization": "table"
+      },
+      "name": "console-output"
+    }
+  ],
+  "fallbackResourceIds": [
+    "__WORKSPACE_ID__"
+  ],
+  "fromTemplateId": "community-Workbooks/Container Jobs Operations"
+}

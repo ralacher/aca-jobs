@@ -1,0 +1,47 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "value": "eastus2"
+    },
+    "environmentName": {
+      "value": "REPLACE-ME"
+    },
+    "existingSubnetId": {
+      "value": ""
+    },
+    "existingPrivateEndpointSubnetId": {
+      "value": ""
+    },
+    "vnetAddressPrefix": {
+      "value": "10.42.0.0/16"
+    },
+    "acaSubnetAddressPrefix": {
+      "value": "10.42.0.0/27"
+    },
+    "privateEndpointSubnetAddressPrefix": {
+      "value": "10.42.0.32/28"
+    },
+    "imageReference": {
+      "value": ""
+    },
+    "deployJobs": {
+      "value": false
+    },
+    "deployObservability": {
+      "value": true
+    },
+    "observabilityActionGroupIds": {
+      "value": []
+    },
+    "tags": {
+      "value": {
+        "Environment": "REPLACE-ME",
+        "ManagedBy": "Bicep",
+        "Project": "container-jobs",
+        "Owner": "REPLACE-WITH-TEAM-EMAIL"
+      }
+    }
+  }
+}
