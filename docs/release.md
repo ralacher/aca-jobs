@@ -2,13 +2,11 @@
 
 The `Release` GitHub Actions workflow validates the repository, requires an explicit manual start, builds and pushes the runtime image with Azure Container Registry Tasks, resolves the image to an immutable digest, previews the Bicep changes, and deploys the enabled jobs through the `dev` environment.
 
-The release is started with the **Run workflow** action. This manual dispatch is the deployment approval: merges do not mutate Azure. Concurrent releases are serialized so that an older deployment cannot overtake a newer one.
+The release is started with the **Run workflow** action followed by a required human approval in the `dev` GitHub environment before any Azure-mutating step runs. Concurrent releases are serialized so that an older deployment cannot overtake a newer one.
 
 ## GitHub Environment
 
-Create a GitHub environment named `dev` and restrict deployment branches to `main`. The current private-repository billing plan does not support GitHub's required-reviewer protection rule, so the manually dispatched workflow provides the approval gate before the entire Azure-mutating job, including the ACR build.
-
-If the repository moves to a plan that supports required reviewers for private repositories, add the deployment approver to the `dev` environment and enable **Prevent self-review** without changing the workflow.
+Create a GitHub environment named `dev`, restrict deployment branches to `main`, add at least one required reviewer, and enable **Prevent self-review**. The deploy job is held at the environment gate until an approved reviewer explicitly approves it — the workflow dispatch alone is not sufficient.
 
 Configure these environment variables:
 
