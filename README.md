@@ -38,7 +38,7 @@ Python 3.11 or newer is required.
 python -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -e '.[dev]'
 .\.venv\Scripts\python.exe -m unittest discover -s tests -v
-.\.venv\Scripts\batchjobs-compile.exe --check
+.\.venv\Scripts\python.exe tools\batchjobs_compile.py --check
 .\.venv\Scripts\python.exe -m compileall -q src jobs
 az bicep build --file infra/main.bicep --stdout | Out-Null
 ```
@@ -61,7 +61,7 @@ docker run --rm --env BATCHJOBS_JOB_ID=example-report container-jobs:local \
 1. Create `jobs/<job-id>/` and add the existing script without modifying it.
 2. Copy and update the example `job.json` with its owner, five-field UTC cron schedule, resources, dependencies, and monitoring freshness threshold.
 3. Leave retries at `0` until the owner confirms that repeating the script cannot duplicate side effects.
-4. Run `.\.venv\Scripts\batchjobs-compile.exe` to regenerate `infra/jobs.parameters.json`.
+4. Run `python tools/batchjobs_compile.py` to regenerate `infra/jobs.parameters.json`.
 5. Run the local validation commands and open a pull request.
 
 Before the first real pilot, complete the inventory for networking, ODBC drivers, file paths, credentials, expected duration, overlap behavior, and rollback ownership.

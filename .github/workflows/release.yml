@@ -30,7 +30,7 @@ jobs:
         run: python -m unittest discover -s tests -v
 
       - name: Check generated job parameters
-        run: batchjobs-compile --check
+        run: python tools/batchjobs_compile.py --check
 
       - name: Compile Bicep
         run: az bicep build --file infra/main.bicep --stdout > /dev/null

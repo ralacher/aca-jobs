@@ -80,8 +80,8 @@ Edit `main.parameters.dev.json` and replace all `REPLACE-*` placeholders. Keep `
 ### 2. Compile and Validate Deployment Inputs
 
 ```bash
-batchjobs-compile
-batchjobs-compile --check
+python tools/batchjobs_compile.py
+python tools/batchjobs_compile.py --check
 az bicep build --file main.bicep
 ```
 

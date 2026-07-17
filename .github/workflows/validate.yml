@@ -29,7 +29,7 @@ jobs:
         run: python -m unittest discover -s tests -v
 
       - name: Check generated job parameters
-        run: batchjobs-compile --check
+        run: python tools/batchjobs_compile.py --check
 
       - name: Compile without importing job modules
         run: python -m compileall -q src jobs
