@@ -77,10 +77,13 @@ jobs:
       - name: Sign in to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ vars.AZURE_CLIENT_ID }}
-          client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
-          tenant-id: ${{ vars.AZURE_TENANT_ID }}
-          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+          creds: |
+            {
+              "clientId": "${{ vars.AZURE_CLIENT_ID }}",
+              "clientSecret": "${{ secrets.AZURE_CLIENT_SECRET }}",
+              "subscriptionId": "${{ vars.AZURE_SUBSCRIPTION_ID }}",
+              "tenantId": "${{ vars.AZURE_TENANT_ID }}"
+            }
 
       - name: Build and push runtime image
         id: image
