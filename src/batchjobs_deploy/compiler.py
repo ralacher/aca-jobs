@@ -116,7 +116,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     rendered = serialize(compile_directory(args.jobs_directory))
     if args.check:
         if not args.output.is_file() or args.output.read_text(encoding="utf-8") != rendered:
-            raise SystemExit(f"{args.output} is stale; run batchjobs-compile")
+            raise SystemExit(
+                f"{args.output} is stale; run python tools/batchjobs_compile.py"
+            )
         return 0
 
     args.output.parent.mkdir(parents=True, exist_ok=True)

@@ -20,7 +20,6 @@ dev = [
 
 [project.scripts]
 batchjobs-run = "batchjobs_runner.runner:main"
-batchjobs-compile = "batchjobs_deploy.compiler:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
