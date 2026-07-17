@@ -41,10 +41,10 @@ jobs:
     environment: dev
     permissions:
       contents: read
-      id-token: write
     env:
       AZURE_ACR_NAME: ${{ vars.AZURE_ACR_NAME }}
       AZURE_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID }}
+      AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
       AZURE_ENVIRONMENT_NAME: ${{ vars.AZURE_ENVIRONMENT_NAME }}
       AZURE_LOCATION: ${{ vars.AZURE_LOCATION }}
       AZURE_RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP }}
@@ -60,6 +60,7 @@ jobs:
           required=(
             AZURE_ACR_NAME
             AZURE_CLIENT_ID
+            AZURE_CLIENT_SECRET
             AZURE_ENVIRONMENT_NAME
             AZURE_LOCATION
             AZURE_RESOURCE_GROUP
@@ -73,10 +74,11 @@ jobs:
             fi
           done
 
-      - name: Sign in to Azure with OIDC
+      - name: Sign in to Azure
         uses: azure/login@v2
         with:
           client-id: ${{ vars.AZURE_CLIENT_ID }}
+          client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
           tenant-id: ${{ vars.AZURE_TENANT_ID }}
           subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
 

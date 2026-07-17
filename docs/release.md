@@ -20,21 +20,17 @@ Configure these environment variables:
 | `AZURE_SUBSCRIPTION_ID` | `<subscription-id>` |
 | `AZURE_TENANT_ID` | Tenant ID containing the deployment identity |
 
-These values are identifiers rather than credentials. Do not create or store a client secret for this workflow.
+Store the client secret as an encrypted GitHub Actions **secret** named `AZURE_CLIENT_SECRET` on the `dev` environment. Do not store it as a plain variable.
 
-## Azure Federation And RBAC
+## Azure App Registration And RBAC
 
-Create an Entra application or user-assigned managed identity for GitHub deployment and add a federated identity credential with:
-
-| Setting | Value |
-| --- | --- |
-| Issuer | `https://token.actions.githubusercontent.com` |
-| Subject | `repo:<owner>/<repository>:environment:dev` |
-| Audience | `api://AzureADTokenExchange` |
+Create an Entra app registration for GitHub deployment and generate a client secret. The tenant may cap secret lifetime — check the maximum permitted duration and set a calendar reminder to rotate before expiry.
 
 Grant the deployment identity the minimum permissions needed to create resources in the target resource group, run ACR Tasks, and manage the role assignments declared by Bicep. The current template requires resource deployment permissions plus role-assignment permissions because it grants the runtime managed identity `AcrPull` and `Storage Blob Data Contributor`.
 
 Scope deployment roles to the target resource group. A practical baseline is `Contributor` plus `Role Based Access Control Administrator`; replace it with a narrower custom role after the pilot if required by policy.
+
+**Secret rotation:** When the client secret nears expiry, generate a new credential on the app registration and update the `AZURE_CLIENT_SECRET` GitHub environment secret before the old one expires.
 
 ## Release Sequence
 
