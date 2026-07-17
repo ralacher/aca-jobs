@@ -1,0 +1,34 @@
+{
+  "$schema": "../../schemas/job-manifest.schema.json",
+  "schemaVersion": "1.0",
+  "id": "example-pipeline-2",
+  "displayName": "Example pipeline",
+  "owner": "platform-team@example.gov",
+  "enabled": true,
+  "runtime": {
+    "script": "script.py",
+    "dependencyGroup": "python311-base",
+    "timeoutSeconds": 900,
+    "cpu": 0.5,
+    "memory": "1Gi",
+    "arguments": []
+  },
+  "schedule": {
+    "cronExpressionUtc": "30 10 * * 1-5"
+  },
+  "execution": {
+    "retryLimit": 0,
+    "overlapPolicy": "skip"
+  },
+  "monitoring": {
+    "maxSilenceMinutes": 1440,
+    "alertOnFailure": true,
+    "alertOnStale": false,
+    "alertOnOverlap": false
+  },
+  "environment": {
+    "SCRIPT_NAME": "example-pipeline-2"
+  },
+  "secretReferences": [],
+  "volumeMounts": []
+}
