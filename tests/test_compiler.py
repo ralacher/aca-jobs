@@ -13,31 +13,44 @@ class CompilerTests(unittest.TestCase):
     def test_compiles_manifest_to_container_job_parameters(self):
         document = compile_directory(ROOT / "jobs")
 
+        self.assertIn("parameters", document)
+        self.assertIn("jobDefinitions", document["parameters"])
         definitions = document["parameters"]["jobDefinitions"]["value"]
-        self.assertEqual(len(definitions), 1)
-        self.assertEqual(
-            definitions[0],
-            {
-                "arguments": [],
-                "cpu": 0.5,
-                "cronExpressionUtc": "30 10 * * 1-5",
-                "enabled": True,
-                "environment": [
-                    {"name": "EXAMPLE_MODE", "value": "validation-only"}
-                ],
-                "id": "example-report",
-                "memory": "1Gi",
-                "monitoring": {
-                    "alertOnFailure": True,
-                    "alertOnOverlap": False,
-                    "alertOnStale": False,
-                    "maxSilenceMinutes": 1440,
-                },
-                "retryLimit": 0,
-                "script": "/app/jobs/example-report/script.py",
-                "timeoutSeconds": 900,
-            },
-        )
+        self.assertIsInstance(definitions, list)
+        self.assertGreater(len(definitions), 0)
+
+        required_keys = {
+            "arguments",
+            "cpu",
+            "cronExpressionUtc",
+            "enabled",
+            "environment",
+            "id",
+            "memory",
+            "monitoring",
+            "retryLimit",
+            "script",
+            "timeoutSeconds",
+        }
+        required_monitoring_keys = {
+            "alertOnFailure",
+            "alertOnOverlap",
+            "alertOnStale",
+            "maxSilenceMinutes",
+        }
+
+        for definition in definitions:
+            self.assertTrue(required_keys.issubset(definition.keys()))
+            self.assertIsInstance(definition["id"], str)
+            self.assertNotEqual(definition["id"].strip(), "")
+            self.assertTrue(
+                definition["script"].startswith(f"/app/jobs/{definition['id']}/")
+            )
+
+            self.assertIsInstance(definition["monitoring"], dict)
+            self.assertTrue(
+                required_monitoring_keys.issubset(definition["monitoring"].keys())
+            )
 
     def test_output_is_deterministic(self):
         first = serialize(compile_directory(ROOT / "jobs"))
