@@ -47,7 +47,7 @@
             "label": "Job",
             "type": 2,
             "isRequired": true,
-            "query": "union (ContainerAppConsoleLogs_CL | extend lifecycle = parse_json(Log_s) | where tostring(lifecycle.schema) == 'batchjobs.lifecycle.v1' | project value = tostring(lifecycle.job_id), label = tostring(lifecycle.job_id) | distinct value, label), (print value=\"no data\", label=\"(awaiting logs)\") | order by label asc",
+            "query": "union isfuzzy=true (ContainerAppConsoleLogs_CL | extend lifecycle = parse_json(Log_s) | where tostring(lifecycle.schema) == 'batchjobs.lifecycle.v1' | project value = tostring(lifecycle.job_id), label = tostring(lifecycle.job_id) | distinct value, label), (print value=\"no data\", label=\"(awaiting logs)\") | order by label asc",
             "crossComponentResources": [
               "__WORKSPACE_ID__"
             ],
@@ -100,7 +100,7 @@
       "type": 3,
       "content": {
         "version": "KqlItem/1.0",
-        "query": "union (ContainerAppConsoleLogs_CL | extend lifecycle = parse_json(Log_s) | where tostring(lifecycle.schema) == 'batchjobs.lifecycle.v1' | extend job_id = tostring(lifecycle.job_id), event = tostring(lifecycle.event), event_time = todatetime(lifecycle.timestamp), duration_ms = tolong(lifecycle.duration_ms), exit_code = toint(lifecycle.exit_code), execution_id = tostring(lifecycle.execution_id) | where event in ('completed','failed','timed_out','lock_failed','rejected','skipped_overlap') | where '{Job}' == 'value::all' or job_id == '{Job}' | summarize arg_max(event_time, event, execution_id, duration_ms, exit_code) by job_id | project Job=job_id, LastRun=event_time, Status=event, Execution=execution_id, DurationMs=duration_ms, ExitCode=exit_code), (print Job=\"(awaiting logs)\", LastRun=now(), Status=\"(pending)\", Execution=\"\", DurationMs=0L, ExitCode=0 | where 1==0) | order by LastRun desc",
+        "query": "union isfuzzy=true (ContainerAppConsoleLogs_CL | extend lifecycle = parse_json(Log_s) | where tostring(lifecycle.schema) == 'batchjobs.lifecycle.v1' | extend job_id = tostring(lifecycle.job_id), event = tostring(lifecycle.event), event_time = todatetime(lifecycle.timestamp), duration_ms = tolong(lifecycle.duration_ms), exit_code = toint(lifecycle.exit_code), execution_id = tostring(lifecycle.execution_id) | where event in ('completed','failed','timed_out','lock_failed','rejected','skipped_overlap') | where '{Job}' == 'value::all' or job_id == '{Job}' | summarize arg_max(event_time, event, execution_id, duration_ms, exit_code) by job_id | project Job=job_id, LastRun=event_time, Status=event, Execution=execution_id, DurationMs=duration_ms, ExitCode=exit_code), (print Job=\"(awaiting logs)\", LastRun=now(), Status=\"(pending)\", Execution=\"\", DurationMs=0L, ExitCode=0 | where 1==0) | order by LastRun desc",
         "size": 0,
         "title": "Latest status by job",
         "timeContextFromParameter": "TimeRange",
@@ -117,7 +117,7 @@
       "type": 3,
       "content": {
         "version": "KqlItem/1.0",
-        "query": "union (ContainerAppConsoleLogs_CL | extend lifecycle = parse_json(Log_s) | where tostring(lifecycle.schema) == 'batchjobs.lifecycle.v1' | extend job_id = tostring(lifecycle.job_id), event = tostring(lifecycle.event), duration_ms = tolong(lifecycle.duration_ms) | where event in ('completed','failed','timed_out') | where '{Job}' == 'value::all' or job_id == '{Job}' | summarize AverageDurationSeconds=avg(duration_ms / 1000.0), P95DurationSeconds=percentile(duration_ms / 1000.0, 95) by bin(TimeGenerated, 1h), job_id), (print TimeGenerated=now(), AverageDurationSeconds=0.0, P95DurationSeconds=0.0, job_id=\"\" | where 1==0) | order by TimeGenerated asc",
+        "query": "union isfuzzy=true (ContainerAppConsoleLogs_CL | extend lifecycle = parse_json(Log_s) | where tostring(lifecycle.schema) == 'batchjobs.lifecycle.v1' | extend job_id = tostring(lifecycle.job_id), event = tostring(lifecycle.event), duration_ms = tolong(lifecycle.duration_ms) | where event in ('completed','failed','timed_out') | where '{Job}' == 'value::all' or job_id == '{Job}' | summarize AverageDurationSeconds=avg(duration_ms / 1000.0), P95DurationSeconds=percentile(duration_ms / 1000.0, 95) by bin(TimeGenerated, 1h), job_id), (print TimeGenerated=now(), AverageDurationSeconds=0.0, P95DurationSeconds=0.0, job_id=\"\" | where 1==0) | order by TimeGenerated asc",
         "size": 0,
         "title": "Execution duration",
         "timeContextFromParameter": "TimeRange",
@@ -134,7 +134,7 @@
       "type": 3,
       "content": {
         "version": "KqlItem/1.0",
-        "query": "union (ContainerAppConsoleLogs_CL | extend lifecycle = parse_json(Log_s) | where tostring(lifecycle.schema) == 'batchjobs.lifecycle.v1' | extend job_id = tostring(lifecycle.job_id), event = tostring(lifecycle.event), execution_id = tostring(lifecycle.execution_id), error_type = tostring(lifecycle.error_type), exit_code = toint(lifecycle.exit_code) | where event in ('failed','timed_out','lock_failed','rejected') | where '{Job}' == 'value::all' or job_id == '{Job}' | project TimeGenerated, Job=job_id, Event=event, Execution=execution_id, ExitCode=exit_code, ErrorType=error_type, Log_s), (print TimeGenerated=now(), Job=\"\", Event=\"\", Execution=\"\", ExitCode=0, ErrorType=\"\", Log_s=\"(awaiting logs)\" | where 1==0) | order by TimeGenerated desc",
+        "query": "union isfuzzy=true (ContainerAppConsoleLogs_CL | extend lifecycle = parse_json(Log_s) | where tostring(lifecycle.schema) == 'batchjobs.lifecycle.v1' | extend job_id = tostring(lifecycle.job_id), event = tostring(lifecycle.event), execution_id = tostring(lifecycle.execution_id), error_type = tostring(lifecycle.error_type), exit_code = toint(lifecycle.exit_code) | where event in ('failed','timed_out','lock_failed','rejected') | where '{Job}' == 'value::all' or job_id == '{Job}' | project TimeGenerated, Job=job_id, Event=event, Execution=execution_id, ExitCode=exit_code, ErrorType=error_type, Log_s), (print TimeGenerated=now(), Job=\"\", Event=\"\", Execution=\"\", ExitCode=0, ErrorType=\"\", Log_s=\"(awaiting logs)\" | where 1==0) | order by TimeGenerated desc",
         "size": 0,
         "title": "Failures and platform errors",
         "timeContextFromParameter": "TimeRange",
@@ -151,7 +151,7 @@
       "type": 3,
       "content": {
         "version": "KqlItem/1.0",
-        "query": "union (ContainerAppConsoleLogs_CL | where '{Job}' == 'value::all' or ContainerName_s == '{Job}' | project TimeGenerated, Job=ContainerName_s, Execution=ContainerGroupName_s, Stream=Stream_s, Message=Log_s | order by TimeGenerated desc | take 500), (print TimeGenerated=now(), Job=\"\", Execution=\"\", Stream=\"\", Message=\"(awaiting logs)\" | where 1==0)",
+        "query": "union isfuzzy=true (ContainerAppConsoleLogs_CL | where '{Job}' == 'value::all' or ContainerName_s == '{Job}' | project TimeGenerated, Job=ContainerName_s, Execution=ContainerGroupName_s, Stream=Stream_s, Message=Log_s | order by TimeGenerated desc | take 500), (print TimeGenerated=now(), Job=\"\", Execution=\"\", Stream=\"\", Message=\"(awaiting logs)\" | where 1==0)",
         "size": 0,
         "title": "Recent console output",
         "timeContextFromParameter": "TimeRange",

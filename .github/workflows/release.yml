@@ -29,8 +29,8 @@ jobs:
       - name: Validate contracts and runner
         run: python -m unittest discover -s tests -v
 
-      - name: Check generated job parameters
-        run: python tools/batchjobs_compile.py --check
+      - name: Generate job parameters
+        run: python tools/batchjobs_compile.py --output "$RUNNER_TEMP/jobs.parameters.json"
 
       - name: Compile Bicep
         run: az bicep build --file infra/main.bicep --stdout > /dev/null
@@ -73,6 +73,14 @@ jobs:
               exit 1
             fi
           done
+
+      - name: Generate job parameters
+        id: jobs
+        shell: bash
+        run: |
+          jobs_parameters="$RUNNER_TEMP/jobs.parameters.json"
+          python tools/batchjobs_compile.py --output "$jobs_parameters"
+          echo "path=$jobs_parameters" >> "$GITHUB_OUTPUT"
 
       - name: Sign in to Azure
         uses: azure/login@v2
@@ -125,7 +133,7 @@ jobs:
             --name "batchjobs-${AZURE_ENVIRONMENT_NAME}-${GITHUB_RUN_NUMBER}-validate" \
             --resource-group "$AZURE_RESOURCE_GROUP" \
             --template-file infra/main.bicep \
-            --parameters infra/jobs.parameters.json \
+            --parameters "${{ steps.jobs.outputs.path }}" \
             --parameters \
               location="$AZURE_LOCATION" \
               environmentName="$AZURE_ENVIRONMENT_NAME" \
@@ -140,7 +148,7 @@ jobs:
             --name "batchjobs-${AZURE_ENVIRONMENT_NAME}-${GITHUB_RUN_NUMBER}-whatif" \
             --resource-group "$AZURE_RESOURCE_GROUP" \
             --template-file infra/main.bicep \
-            --parameters infra/jobs.parameters.json \
+            --parameters "${{ steps.jobs.outputs.path }}" \
             --parameters \
               location="$AZURE_LOCATION" \
               environmentName="$AZURE_ENVIRONMENT_NAME" \
@@ -156,7 +164,7 @@ jobs:
             --name "$deployment_name" \
             --resource-group "$AZURE_RESOURCE_GROUP" \
             --template-file infra/main.bicep \
-            --parameters infra/jobs.parameters.json \
+            --parameters "${{ steps.jobs.outputs.path }}" \
             --parameters \
               location="$AZURE_LOCATION" \
               environmentName="$AZURE_ENVIRONMENT_NAME" \

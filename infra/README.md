@@ -80,12 +80,11 @@ Edit `main.parameters.dev.json` and replace all `REPLACE-*` placeholders. Keep `
 ### 2. Compile and Validate Deployment Inputs
 
 ```bash
-python tools/batchjobs_compile.py
-python tools/batchjobs_compile.py --check
+python ../tools/batchjobs_compile.py --output .cache/jobs.parameters.json
 az bicep build --file main.bicep
 ```
 
-`jobs.parameters.json` is generated deterministically from every `jobs/*/job.json` manifest and is committed for pull-request review. Do not edit it directly. The compiler rejects reserved platform environment variables and fails explicitly when a manifest requests secret or volume deployment, which are not implemented yet.
+`jobs.parameters.json` is generated deterministically from every `jobs/*/job.json` manifest by the GitHub workflows and is not committed. Do not edit generated output directly. The compiler rejects reserved platform environment variables and fails explicitly when a manifest requests secret or volume deployment, which are not implemented yet.
 
 ### 3. Deploy the Shared Foundation
 
@@ -99,7 +98,7 @@ az group create \
 az deployment group create \
   --resource-group rg-batchjobs-dev \
   --template-file main.bicep \
-  --parameters main.parameters.dev.json jobs.parameters.json
+  --parameters main.parameters.dev.json .cache/jobs.parameters.json
 ```
 
 ### 4. Build and Push the Image

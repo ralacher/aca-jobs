@@ -102,7 +102,7 @@ def build_parser() -> argparse.ArgumentParser:
         description="Compile job manifests into deterministic Bicep parameters."
     )
     parser.add_argument("--jobs-directory", type=Path, default=Path("jobs"))
-    parser.add_argument("--output", type=Path, default=Path("infra/jobs.parameters.json"))
+    parser.add_argument("--output", type=Path, default=Path(".cache/jobs.parameters.json"))
     parser.add_argument(
         "--check",
         action="store_true",
