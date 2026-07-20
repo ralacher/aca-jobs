@@ -4,6 +4,18 @@ This repository is the starting point for moving independently owned Python batc
 
 The platform does not require application rewrites. A platform-owned runner launches each unchanged script as a child process, preserves its output and exit status, and adds lifecycle telemetry around it.
 
+```mermaid
+flowchart LR
+	A[Developer adds script and job.json] --> B[Run local validation]
+	B --> C[Push commit to GitHub]
+	C --> D[GitHub Actions validate]
+	D --> E[Compile job manifests on runner]
+	E --> F[Build runtime image]
+	F --> G[Deploy to Azure]
+	G --> H[Container Apps Jobs run on schedule]
+	H --> I[Logs and workbook capture history]
+```
+
 ## Target Model
 
 - GitHub is the source of truth for scripts and job configuration.
